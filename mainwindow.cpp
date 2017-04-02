@@ -23,6 +23,10 @@ MainWindow::MainWindow(QWidget *parent) :
         QDir().mkdir(iconFolder);
     }
 
+    if(!QDir().exists(downloadFolder)){
+        QDir().mkdir(downloadFolder);
+    }
+
     //Populate the widgets
     updateUIPodcastList();
 
@@ -36,6 +40,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Only show minimize button
     //setWindowFlags(Qt::WindowTitleHint | Qt::WindowMinMaxButtonsHint);
+
+    // Podcast List right click menu
+    ui->PodcastList->setContextMenuPolicy(Qt::CustomContextMenu);
+    //QMenu *podcastMenu = new QMenu(this);
+    //podcastMenu.addAction(new QAction(tr("Download Episode"), this));
+
+    connect(ui->PodcastList,SIGNAL(customContextMenuRequested(const QPoint &)),SLOT(podcastListMenu(const QPoint &)));
+
+    // Episode List right click menu
+    ui->EpisodeList->setContextMenuPolicy(Qt::CustomContextMenu);
+    QAction *episodeDownloadAction = new QAction(tr("Download All Episodes"));
+    episodeMenu->addAction(episodeDownloadAction);
+
+    connect(episodeDownloadAction, SIGNAL(triggered(bool)), this, SLOT(downloadPodcast()));
+    connect(ui->EpisodeList,SIGNAL(customContextMenuRequested(const QPoint &)),SLOT(episodeListMenu(const QPoint &)));
 
     // Tray icon menu initialization
     QAction *closeAction = new QAction("&Close", this);
@@ -94,6 +113,43 @@ void MainWindow::closeWindow()
 {
     canClose = true;
     this->close();
+}
+
+void MainWindow::episodeListMenu(const QPoint &pos)
+{
+    QPoint globalPos = ui->EpisodeList->mapToGlobal(pos);
+    episodeMenu->exec(globalPos);
+}
+
+void MainWindow::podcastListMenu(const QPoint &pos)
+{
+    QPoint globalPos = ui->PodcastList->mapToGlobal(pos);
+    //contextMenu.exec(globalPos);
+}
+
+void MainWindow::downloadPodcast()
+{
+    qDebug() << episodeFile();
+    //When the http request is finished, call the storePodcast function
+    QObject::connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(storePodcast(QNetworkReply*)));
+    //http request
+    manager->get(QNetworkRequest(episodeFile()));
+}
+
+void MainWindow::storePodcast(QNetworkReply *reply){
+    //If there is a reply error then display message
+    if (reply->error() == QNetworkReply::NoError) {
+
+        //parse the json reply and get the rss link string
+        qDebug() << ((QString)reply->readAll()).toUtf8();
+
+        reply->deleteLater();
+    }
+    else {
+        //reply error, display message
+        ui->statusBar->showMessage("Network Request Failed..." + reply->errorString(), 3000);
+        reply->deleteLater();
+    }
 }
 
 void MainWindow::on_actionUsing_Itunes_Link_triggered()
@@ -346,7 +402,7 @@ void MainWindow::getRSSurl(QString itunesLink){
         //Create the request url using the podcast id
         QUrl url("https://itunes.apple.com/lookup?id=" + PodcastID + "&entity=podcast");
         //create new network manager
-        manager = new QNetworkAccessManager();
+        //manager = new QNetworkAccessManager();
         //When the http request is finished, call the parseItunesReply function
         QObject::connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(parseItunesReply(QNetworkReply*)));
         //http request

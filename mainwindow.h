@@ -94,18 +94,30 @@ private slots:
 
     void closeWindow();
 
+<<<<<<< Updated upstream
     void bufferPlayEpisode();
+=======
+    void episodeListMenu(const QPoint &pos);
+
+    void podcastListMenu(const QPoint &pos);
+
+    void downloadPodcast();
+
+    void storePodcast(QNetworkReply *reply);
+>>>>>>> Stashed changes
 
 private:
     Ui::MainWindow *ui;
 
-    QNetworkAccessManager *manager;
+    QNetworkAccessManager *manager = new QNetworkAccessManager();
 
     QString appDataFolder = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/PodcastFeed";
 
     QString xmlFolder = appDataFolder + "/xml";
 
     QString iconFolder = appDataFolder + "/icons";
+
+    QString downloadFolder = appDataFolder + "/downloads";
 
     QString appDataFile = appDataFolder + "/podcasts.json";
 
@@ -115,8 +127,12 @@ private:
 
     bool canClose = false;
 
+<<<<<<< Updated upstream
     QBuffer immPlay;
 
+=======
+    QMenu *episodeMenu = new QMenu(this);
+>>>>>>> Stashed changes
 };
 
 #endif // MAINWINDOW_H
