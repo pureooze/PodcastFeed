@@ -19,4 +19,4 @@ The media player will have standard play/pause buttons, a label showing the curr
 * Background Playback when user interface is closed (application goes to the taskbar.)
 
 ### Illustration: ###
-![picture alt](https://github.com/ForeEyes/PodcastFeed/blob/master/readme%20illustration/Illustration.PNG)
+![picture alt](https://github.com/pureooze/PodcastFeed/blob/master/readme%20illustration/Illustration.PNG)
